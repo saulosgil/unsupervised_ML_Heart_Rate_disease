@@ -1,0 +1,136 @@
+---
+title: "Heart Disease Data set - An Unsupervised Learning Approach"
+author: "Saulo Gil"
+date: "06/10/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Packages
+```{r include=FALSE}
+library(tidyverse)
+library(DT)
+library(factoextra)
+```
+
+# Pre-processing 
+## Loading and adjusting database
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+data <- 
+  read_csv("processed.cleveland.data", 
+    col_names = FALSE)
+
+colnames(data) <- c(
+  "age",
+  "sex",
+  "cp",
+  "trestbps",
+  "chol",
+  "fbs",
+  "restecg",
+  "thalach",
+  "exang",
+  "oldpeak",
+  "slope",
+  "ca",
+  "thal",
+  "num"
+)
+
+data <- 
+  data |>
+  mutate(ca = as.double(ca),
+         thal = as.double(thal)) |> 
+  select(-sex)
+```
+
+```{r}
+datatable(data = data, rownames = FALSE)
+```
+
+## Verifying missing values
+```{r out.width="100%"}
+DataExplorer::plot_missing(data) +
+  theme_bw() + 
+  theme(legend.title = element_blank(),
+        legend.position = "none")
+```
+## Removing missing data
+```{r}
+data <-
+  drop_na(data)
+```
+
+## Lets see missing data again
+```{r out.width="100%"}
+DataExplorer::plot_missing(data) +
+  theme_bw() + 
+  theme(legend.title = element_blank(),
+        legend.position = "none")
+```
+
+## Data summary
+```{r out.width="100%"}
+skimr::skim(data)
+```
+## Scaling data - z-score approach
+
+```{r out.width="100%"}
+data_scaled <- 
+  scale(data) |> as_tibble()
+
+skimr::skim(data_scaled)
+```
+# Detecting outliers - Z-score approach (> 2 units)
+
+```{r}
+
+```
+# Reducing the dimensionality
+
+```{r out.width = "100%"}
+PCA <- princomp(data_scaled)
+
+PCA |> 
+  fviz(element = "ind") +
+  theme_bw()
+```
+
+```{r out.width="100%"}
+PCA |>
+  plot()
+```
+
+# Clustering
+## Checking optimal number of clustering using K-Means and elbow method
+```{r out.width="100%"}
+fviz_nbclust(data_scaled, kmeans, method = "wss")
+```
+
+```{r out.width="100%"}
+fviz_cluster(kmeans(data_scaled, centers = 2), data = data_scaled) +
+  theme_bw()
+```
+
+
+## Checking optimal number of clustering using Hierarchical Clustering and elbow method
+```{r out.width="100%"}
+fviz_nbclust(data_scaled, hcut, method = "wss")
+```
+
+```{r out.width="100%"}
+fviz_cluster(hcut(data_scaled, centers = 2), data = data_scaled) +
+  theme_bw()
+
+```
+
+
+
+
+
+
+
+
